@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1e1e1e">
+<meta name="apple-mobile-web-app-title" content="NEXO">
+<title>NEXO</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+html,body{background:#1e1e1e;color:#d4d4d4;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;height:100%;overflow:hidden;-webkit-font-smoothing:antialiased}
+:root{
+  --g:#4dffaa;--gd:#2ecc80;--gg:rgba(77,255,170,0.08);--gs:rgba(77,255,170,0.04);
+  --a:#ffcc55;--ad:#cc9900;--r:#ff6680;--p:#aa88ff;
+  --w:#d4d4d4;--w2:#a0a0a0;--gr:#666;--grd:#444;
+  --bg:#1e1e1e;--bg2:#242424;--bg3:#2a2a2a;--bg4:#303030;--bd:#363636;--bd2:#404040;
+}
+/* BOOT */
+#boot{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;justify-content:center;padding:44px 32px;z-index:999;transition:opacity 0.6s}
+.bl{opacity:0;transition:opacity 0.5s;margin-bottom:5px}
+/* APP */
+.app{display:flex;flex-direction:column;height:100dvh;max-width:430px;margin:0 auto;position:relative;overflow:hidden;background:var(--bg)}
+/* HEADER */
+.hdr{padding:16px 18px 12px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.prompt{font-size:10px;color:var(--gr);margin-bottom:5px;letter-spacing:.03em}
+.prompt em{color:var(--g);font-style:normal}
+.hdr-row{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.logo{font-size:20px;font-weight:700;color:var(--g);text-shadow:0 0 18px rgba(77,255,170,.3);letter-spacing:-.5px;display:flex;align-items:center;gap:6px}
+.logo-ver{font-size:10px;color:var(--gr);font-weight:400;margin-top:4px}
+.hdr-right{text-align:right}
+.clock{font-size:13px;color:var(--w2);font-weight:500}
+.hdr-day{font-size:10px;color:var(--gr);margin-top:1px}
+.icc-row{display:flex;align-items:center;gap:8px}
+.icc-lbl{font-size:10px;color:var(--gr);width:22px;flex-shrink:0}
+.icc-track{flex:1;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.icc-fill{height:100%;border-radius:2px;transition:width 1.2s ease}
+.icc-num{font-size:11px;font-weight:500;width:20px;text-align:right;flex-shrink:0}
+.icc-tag{font-size:10px;color:var(--gr);margin-left:4px}
+/* SCROLL */
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding-bottom:76px;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.scroll::-webkit-scrollbar{display:none}
+/* PAGES */
+.pg{display:none;animation:fadeIn .2s ease}.pg.on{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+/* SECTIONS */
+.sec{padding:14px 18px;border-bottom:1px solid var(--bd)}
+.sec:last-child{border-bottom:none}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.st{font-size:10px;font-weight:500;color:var(--g);letter-spacing:.06em;text-shadow:0 0 8px rgba(77,255,170,.25)}
+.sm{font-size:10px;color:var(--gr)}
+.cmt{font-size:10px;color:var(--gr);margin-bottom:9px;line-height:1.5}
+.cmt::before{content:'// ';opacity:.6}
+/* CARDS */
+.card{background:var(--bg3);border:1px solid var(--bd);border-radius:5px;padding:12px 14px;margin-bottom:8px}
+.card:last-child{margin-bottom:0}
+.card-accent{border-left:2px solid}
+/* STATUS GRID */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:9px}
+.si{background:var(--bg3);border:1px solid var(--bd);border-radius:4px;padding:9px 11px}
+.sk{font-size:10px;color:var(--gr);margin-bottom:3px}
+.sv{font-size:13px;font-weight:500}
+/* AGENT GRID */
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ab{background:var(--bg3);border:1px solid var(--bd);border-radius:5px;padding:12px 13px;cursor:pointer;text-align:left;transition:border-color .15s,background .15s;user-select:none}
+.ab.act{border-color:var(--gd);background:var(--bg4)}
+.ab:active{opacity:.75;transform:scale(.975)}
+.ap{font-size:10px;color:var(--grd);margin-bottom:4px}
+.ap::before{content:'› ';color:var(--gd)}
+.an{font-size:13px;font-weight:500;color:var(--w)}
+.ad{font-size:10px;margin-top:2px}
+/* MISSION BLOCK */
+.mb{background:var(--bg3);border:1px solid var(--bd);border-radius:5px;padding:13px;margin-bottom:8px}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.mtag{font-size:10px}
+.mtime{font-size:10px;color:var(--a);text-shadow:0 0 4px rgba(255,204,85,.35);font-weight:500}
+.mtxt{font-size:13px;color:var(--w);margin-bottom:4px;line-height:1.5}
+.msub{font-size:10px;color:var(--gr)}
+.msub::before{content:'// '}
+/* IDEA ITEMS */
+.ii{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--bd);cursor:pointer;transition:opacity .15s}
+.ii:last-child{border-bottom:none}
+.ii:active{opacity:.7}
+.ib{font-size:11px;flex-shrink:0;width:14px;padding-top:1px}
+.it{font-size:12px;color:var(--w);line-height:1.5;margin-bottom:3px}
+.im{font-size:10px;color:var(--gr)}
+.itag{color:var(--gd)}
+/* INPUTS */
+textarea,input[type=text]{width:100%;background:var(--bg3);border:1px solid var(--bd);border-radius:4px;padding:10px 12px;color:var(--w);font-family:'JetBrains Mono',monospace;font-size:12px;resize:none;outline:none;line-height:1.5;transition:border-color .15s}
+textarea:focus,input[type=text]:focus{border-color:var(--gd)}
+textarea::placeholder,input[type=text]::placeholder{color:var(--grd)}
+/* CHIPS */
+.chips{display:flex;gap:7px;margin-bottom:11px;flex-wrap:wrap}
+.chip{padding:5px 11px;border:1px solid var(--bd);border-radius:20px;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--gr);background:transparent;cursor:pointer;transition:all .15s;white-space:nowrap}
+.chip.sel{border-color:var(--gd);color:var(--g);background:var(--gg)}
+.chip:active{opacity:.7}
+/* BUTTONS */
+.btn{width:100%;padding:11px;background:var(--gg);border:1px solid var(--gd);border-radius:4px;color:var(--g);font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;text-shadow:0 0 8px rgba(77,255,170,.25);margin-top:9px;letter-spacing:.02em}
+.btn:active{opacity:.75;transform:scale(.99)}
+.btn-ghost{width:100%;padding:9px;background:transparent;border:none;color:var(--gr);font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;margin-top:6px}
+.btn-sm{padding:7px 14px;width:auto;margin-top:0;font-size:11px}
+/* HEALTH DOTS */
+.hbar{display:flex;gap:4px;align-items:center}
+.hd{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+/* RUTAS */
+.ri{display:flex;align-items:flex-start;gap:11px;padding:10px 0;border-bottom:1px solid var(--bd);cursor:pointer;transition:opacity .15s}
+.ri:last-child{border-bottom:none}
+.ri:active{opacity:.7}
+.rnum{font-size:10px;color:var(--gr);width:18px;flex-shrink:0;padding-top:2px}
+.rname{font-size:12px;color:var(--w);margin-bottom:3px;line-height:1.4}
+.rtags{display:flex;gap:5px;flex-wrap:wrap}
+.rtag{font-size:10px;color:var(--gr)}
+.rtag::before{content:'#';color:var(--gd)}
+.rdist{font-size:10px;color:var(--a);flex-shrink:0;padding-top:2px;font-weight:500}
+/* STREAK */
+.sgrid{display:flex;gap:3px;flex-wrap:wrap;margin-top:8px}
+.sd{width:11px;height:11px;border-radius:2px;flex-shrink:0}
+/* NAV */
+.nav{position:absolute;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--bd);display:flex;padding:7px 0 max(9px,env(safe-area-inset-bottom));z-index:100}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 4px;cursor:pointer;border:none;background:transparent;transition:opacity .15s}
+.nb:active{opacity:.6}
+.ni{font-size:16px;line-height:1.2}
+.nl{font-size:9px;color:var(--gr);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;transition:color .15s}
+.nb.on .nl{color:var(--g);text-shadow:0 0 6px rgba(77,255,170,.4)}
+.nb.on .ni{filter:drop-shadow(0 0 4px rgba(77,255,170,.5))}
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.modal.on{display:flex;animation:fadeIn .2s ease}
+.msheet{width:100%;max-width:430px;background:var(--bg2);border-top:1px solid var(--gd);border-radius:12px 12px 0 0;padding:20px 18px max(24px,calc(env(safe-area-inset-bottom)+16px));animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.mttl{font-size:13px;color:var(--g);margin-bottom:3px;text-shadow:0 0 8px rgba(77,255,170,.3);font-weight:500}
+.msub{font-size:10px;color:var(--gr);margin-bottom:13px}
+.msub::before{content:'// '}
+/* CURSOR */
+.cur{display:inline-block;width:7px;height:13px;background:var(--g);box-shadow:0 0 6px rgba(77,255,170,.9);vertical-align:middle;margin-left:1px;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+/* TOAST */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--gd);border-radius:20px;padding:8px 18px;font-size:11px;color:var(--g);text-shadow:0 0 6px rgba(77,255,170,.3);z-index:300;opacity:0;transition:opacity .3s;white-space:nowrap;pointer-events:none}
+.toast.on{opacity:1}
+/* EMPTY STATE */
+.empty{text-align:center;padding:32px 20px;color:var(--gr);font-size:11px;line-height:1.8}
+.empty-icon{font-size:24px;margin-bottom:10px;opacity:.4}
+/* PULSO HISTORY */
+.phi{padding:10px 0;border-bottom:1px solid var(--bd)}
+.phi:last-child{border-bottom:none}
+.phd{font-size:10px;color:var(--gr);margin-bottom:4px}
+.pht{font-size:12px;color:var(--w2);line-height:1.5}
+/* DIVIDER */
+.divider{height:1px;background:var(--bd);margin:0 18px}
+/* BADGE */
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+</style>
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div id="boot">
+  <div class="bl" id="b0" style="font-size:11px;color:var(--gr);margin-bottom:20px">fabricio@nexo:~ $</div>
+  <div class="bl" id="b1" style="font-size:11px;color:var(--gr)">// cargando alma...</div>
+  <div class="bl" id="b2" style="font-size:11px;color:var(--gr)">// leyendo protocolo · calibrando icc...</div>
+  <div class="bl" id="b3" style="font-size:28px;font-weight:700;color:var(--g);text-shadow:0 0 24px rgba(77,255,170,.45);letter-spacing:-1px;margin:24px 0 8px">NEXO<span class="cur"></span></div>
+  <div class="bl" id="b4" style="font-size:11px;color:var(--gr);font-style:italic;margin-bottom:8px">// quiet on the surface. deep underneath.</div>
+  <div class="bl" id="b5" style="font-size:11px;color:var(--gr)">sistema listo · bienvenido, fabricio</div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app" style="display:none">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="prompt">fabricio@nexo ~ $ <em>status</em></div>
+    <div class="hdr-row">
+      <div class="logo">NEXO <span class="cur"></span><div class="logo-ver">v0.1</div></div>
+      <div class="hdr-right">
+        <div class="clock" id="clock">--:--</div>
+        <div class="hdr-day" id="dayname">--</div>
+      </div>
+    </div>
+    <div class="icc-row">
+      <span class="icc-lbl">icc</span>
+      <div class="icc-track"><div class="icc-fill" id="iccFill" style="width:0%"></div></div>
+      <span class="icc-num" id="iccNum" style="color:var(--g)">--</span>
+      <span class="icc-tag" id="iccTag">› calculando</span>
+    </div>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div class="scroll" id="scroll">
+
+    <!-- ══ PAGE: NEXO ══ -->
+    <div class="pg on" id="pg-nexo">
+      <div class="sec">
+        <div class="sh"><span class="st">$ estado_actual</span><span class="sm" id="nexo-time">ahora</span></div>
+        <div class="cmt" id="nexo-modo">cargando contexto...</div>
+        <div class="sg">
+          <div class="si"><div class="sk">icc</div><div class="sv" id="ns-icc" style="color:var(--g)">--</div></div>
+          <div class="si"><div class="sk">ideas hoy</div><div class="sv" id="ns-ideas" style="color:var(--g)">0</div></div>
+          <div class="si"><div class="sk">pulsos esta sem.</div><div class="sv" id="ns-pulsos" style="color:var(--gd)">0</div></div>
+          <div class="si"><div class="sk">misiones</div><div class="sv" id="ns-misiones" style="color:var(--a)">0 hoy</div></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ nexo.sugiere</span></div>
+        <div class="mb" style="border-color:var(--ad)" id="nexo-suggest">
+          <div class="mh"><span class="mtag" style="color:var(--a)">› recomendación</span><span class="mtime" id="ns-dur">--</span></div>
+          <div class="mtxt" id="ns-txt">Analizando tu estado...</div>
+          <div class="msub" id="ns-sub">un momento</div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ agentes</span><span class="sm">[6 disponibles]</span></div>
+        <div class="ag">
+          <div class="ab" onclick="openModal('idea')"><div class="ap">idea</div><div class="an">Idea</div><div class="ad" style="color:var(--gr)">captura rápida</div></div>
+          <div class="ab" onclick="navTo('foco')"><div class="ap">foco</div><div class="an">Foco</div><div class="ad" id="ag-foco" style="color:var(--gr)">misiones</div></div>
+          <div class="ab" onclick="navTo('pulso')"><div class="ap">pulso</div><div class="an">Pulso</div><div class="ad" style="color:var(--gr)">cierre del día</div></div>
+          <div class="ab" onclick="navTo('vault')"><div class="ap">vault</div><div class="an">Vault</div><div class="ad" id="ag-vault" style="color:var(--gd)">0 ideas</div></div>
+          <div class="ab" onclick="navTo('vida')"><div class="ap">vida</div><div class="an">Vida</div><div class="ad" style="color:var(--gr)">salud · rutas</div></div>
+          <div class="ab" onclick="navTo('mirror')"><div class="ap">mirror</div><div class="an">Mirror</div><div class="ad" style="color:var(--gr)">semana</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: VAULT ══ -->
+    <div class="pg" id="pg-vault">
+      <div class="sec">
+        <div class="sh"><span class="st">$ vault.ideas</span><span class="sm" id="vault-count">[0 total]</span></div>
+        <div class="cmt">tus capturas · ordenadas por recencia</div>
+        <div id="vault-list"><div class="empty"><div class="empty-icon">◈</div>Sin ideas todavía.<br>Usa el agente Idea para capturar.</div></div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: FOCO ══ -->
+    <div class="pg" id="pg-foco">
+      <div class="sec" id="foco-active-sec" style="display:none">
+        <div class="sh"><span class="st">$ foco.activo</span><span class="sm" style="color:var(--a)">EN CURSO</span></div>
+        <div class="mb" style="border-color:var(--ad)">
+          <div class="mh"><span class="mtag" id="fa-proj" style="color:var(--a)">›</span><span class="mtime" id="fa-timer">00:00</span></div>
+          <div class="mtxt" id="fa-txt">--</div>
+          <div class="msub" id="fa-sub">--</div>
+        </div>
+        <div class="sh" style="margin-top:4px"><span class="st">$ cerrar_mision</span></div>
+        <div class="cmt">¿cómo salió?</div>
+        <div class="chips" id="foco-result-chips">
+          <button class="chip sel" onclick="selGroup(this)">completada</button>
+          <button class="chip" onclick="selGroup(this)">parcial</button>
+          <button class="chip" onclick="selGroup(this)">abandonada</button>
+        </div>
+        <textarea id="foco-note" placeholder="// nota opcional..." rows="2" style="margin-bottom:8px"></textarea>
+        <button class="btn" onclick="closeMission()">registrar › continuar</button>
+      </div>
+      <div class="sec" id="foco-new-sec">
+        <div class="sh"><span class="st">$ nueva_mision</span></div>
+        <div class="cmt">¿qué vas a hacer?</div>
+        <input type="text" id="foco-task" placeholder="// describe la misión..." style="margin-bottom:9px">
+        <div class="cmt" style="margin-top:4px">proyecto</div>
+        <div class="chips" id="foco-proj-chips">
+          <button class="chip sel" onclick="selGroup(this)">luckyvet</button>
+          <button class="chip" onclick="selGroup(this)">poi</button>
+          <button class="chip" onclick="selGroup(this)">autopilot</button>
+          <button class="chip" onclick="selGroup(this)">personal</button>
+        </div>
+        <div class="cmt">tiempo disponible</div>
+        <div class="chips" id="foco-time-chips">
+          <button class="chip" onclick="selGroup(this)">10 min</button>
+          <button class="chip sel" onclick="selGroup(this)">25 min</button>
+          <button class="chip" onclick="selGroup(this)">45 min</button>
+          <button class="chip" onclick="selGroup(this)">90 min</button>
+        </div>
+        <button class="btn" onclick="startMission()">iniciar misión ›</button>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ historial</span><span class="sm" id="foco-hist-count">[0]</span></div>
+        <div id="foco-hist-list"><div class="empty"><div class="empty-icon">◎</div>Sin misiones todavía.</div></div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: PULSO ══ -->
+    <div class="pg" id="pg-pulso">
+      <div class="sec">
+        <div class="sh"><span class="st">$ pulso.diario</span><span class="sm">3 min</span></div>
+        <div class="cmt">cierre del día · alimenta el mirror</div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:10px;color:var(--gr);margin-bottom:6px"><span style="color:var(--g)">› </span>¿qué pasó hoy?</div>
+          <textarea id="p1" placeholder="// lo más relevante..." rows="3"></textarea>
+        </div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:10px;color:var(--gr);margin-bottom:6px"><span style="color:var(--g)">› </span>¿qué quedó abierto?</div>
+          <textarea id="p2" placeholder="// sin resolver..." rows="2"></textarea>
+        </div>
+        <div style="margin-bottom:12px">
+          <div style="font-size:10px;color:var(--gr);margin-bottom:6px"><span style="color:var(--g)">› </span>¿lo único importante de mañana?</div>
+          <textarea id="p3" placeholder="// una cosa" rows="2"></textarea>
+        </div>
+        <div style="font-size:10px;color:var(--gr);margin-bottom:8px"><span style="color:var(--g)">› </span>icc de hoy</div>
+        <div class="chips" id="pulso-icc-chips">
+          <button class="chip" onclick="selGroup(this)">bajo</button>
+          <button class="chip sel" onclick="selGroup(this)">medio</button>
+          <button class="chip" onclick="selGroup(this)">alto</button>
+        </div>
+        <button class="btn" onclick="savePulso()">registrar pulso › cerrar día</button>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ historial_pulsos</span><span class="sm" id="pulso-hist-count">[0]</span></div>
+        <div id="pulso-hist-list"><div class="empty"><div class="empty-icon">◉</div>Sin pulsos todavía.</div></div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: VIDA ══ -->
+    <div class="pg" id="pg-vida">
+      <div class="sec">
+        <div class="sh"><span class="st">$ salud.hoy</span></div>
+        <div class="cmt">estado personal · no métricas frías</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd)">
+          <span style="font-size:11px;color:var(--gr)">hidratación</span>
+          <div class="hbar" id="hidro-bar"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd)">
+          <span style="font-size:11px;color:var(--gr)">vasos hoy</span>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button onclick="changeHidro(-1)" style="background:var(--bg3);border:1px solid var(--bd);border-radius:3px;color:var(--gr);font-family:'JetBrains Mono',monospace;font-size:14px;width:28px;height:28px;cursor:pointer;line-height:1">-</button>
+            <span id="hidro-num" style="font-size:14px;font-weight:500;color:var(--g);width:16px;text-align:center">0</span>
+            <button onclick="changeHidro(1)" style="background:var(--bg3);border:1px solid var(--bd);border-radius:3px;color:var(--g);font-family:'JetBrains Mono',monospace;font-size:14px;width:28px;height:28px;cursor:pointer;line-height:1">+</button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bd)">
+          <span style="font-size:11px;color:var(--gr)">gym hoy</span>
+          <button id="gym-btn" onclick="toggleGym()" style="padding:5px 14px;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:11px;cursor:pointer;transition:all .15s">no</button>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0">
+          <span style="font-size:11px;color:var(--gr)">racha gym</span>
+          <span id="gym-racha" style="font-size:13px;font-weight:500;color:var(--g)">0 días</span>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ gym.semana</span></div>
+        <div id="gym-week" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"></div>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ rutas.madrid</span><span class="sm">fin de semana</span></div>
+        <div class="cmt">preparadas · sin buscar a última hora</div>
+        <div class="ri"><span class="rnum">01</span><div style="flex:1"><div class="rname">La Pedriza — Canto Cochino</div><div class="rtags"><span class="rtag">naturaleza</span><span class="rtag">moderada</span><span class="rtag">rocas</span></div></div><span class="rdist">55km</span></div>
+        <div class="ri"><span class="rnum">02</span><div style="flex:1"><div class="rname">Ruta de los Glaciares</div><div class="rtags"><span class="rtag">fácil</span><span class="rtag">paisaje</span><span class="rtag">río</span></div></div><span class="rdist">65km</span></div>
+        <div class="ri"><span class="rnum">03</span><div style="flex:1"><div class="rname">Chinchón + Aranjuez</div><div class="rtags"><span class="rtag">pueblo</span><span class="rtag">gastronomía</span></div></div><span class="rdist">45km</span></div>
+        <div class="ri"><span class="rnum">04</span><div style="flex:1"><div class="rname">Patones de Arriba</div><div class="rtags"><span class="rtag">medieval</span><span class="rtag">corto</span></div></div><span class="rdist">55km</span></div>
+        <div class="ri"><span class="rnum">05</span><div style="flex:1"><div class="rname">Hayedo de Montejo</div><div class="rtags"><span class="rtag">bosque</span><span class="rtag">otoño</span></div></div><span class="rdist">110km</span></div>
+        <div class="ri"><span class="rnum">06</span><div style="flex:1"><div class="rname">Buitrago del Lozoya</div><div class="rtags"><span class="rtag">pueblo</span><span class="rtag">muralla</span></div></div><span class="rdist">75km</span></div>
+        <div class="ri"><span class="rnum">07</span><div style="flex:1"><div class="rname">Cercedilla — Valle de la Fuenfría</div><div class="rtags"><span class="rtag">montaña</span><span class="rtag">pinos</span></div></div><span class="rdist">50km</span></div>
+        <div class="ri"><span class="rnum">08</span><div style="flex:1"><div class="rname">Segovia — día completo</div><div class="rtags"><span class="rtag">patrimonio</span><span class="rtag">gastronomía</span></div></div><span class="rdist">90km</span></div>
+        <div class="ri"><span class="rnum">09</span><div style="flex:1"><div class="rname">Rascafría + monasterio</div><div class="rtags"><span class="rtag">naturaleza</span><span class="rtag">tranquilo</span></div></div><span class="rdist">70km</span></div>
+        <div class="ri" style="border-bottom:none"><span class="rnum">10</span><div style="flex:1"><div class="rname">Toledo — día completo</div><div class="rtags"><span class="rtag">historia</span><span class="rtag">arte</span></div></div><span class="rdist">75km</span></div>
+      </div>
+    </div>
+
+    <!-- ══ PAGE: MIRROR ══ -->
+    <div class="pg" id="pg-mirror">
+      <div class="sec">
+        <div class="sh"><span class="st">$ mirror.semanal</span><span class="sm" id="mirror-sem">sem -- · 2026</span></div>
+        <div class="cmt">lo que el sistema ha visto</div>
+        <div class="sg">
+          <div class="si"><div class="sk">ideas capturadas</div><div class="sv" id="mr-ideas" style="color:var(--g)">0</div></div>
+          <div class="si"><div class="sk">pulsos</div><div class="sv" id="mr-pulsos" style="color:var(--gd)">0 / 7</div></div>
+          <div class="si"><div class="sk">sesiones gym</div><div class="sv" id="mr-gym" style="color:var(--a)">0</div></div>
+          <div class="si"><div class="sk">vasos agua avg</div><div class="sv" id="mr-agua" style="color:var(--w2)">--</div></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ diario_inverso</span></div>
+        <div class="cmt">esta semana el sistema vio</div>
+        <div id="mirror-diario"><div class="empty" style="padding:16px 0"><div class="empty-icon">◉</div>Acumula datos durante la semana.<br>El mirror se escribe solo.</div></div>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ streak_gym</span></div>
+        <div class="cmt">últimas 4 semanas</div>
+        <div class="sgrid" id="mirror-streak"></div>
+        <div id="mirror-streak-meta" style="margin-top:8px;font-size:10px;color:var(--gr)">// sin datos todavía</div>
+      </div>
+      <div class="sec">
+        <div class="sh"><span class="st">$ ultimo_pulso</span></div>
+        <div id="mirror-last-pulso"><div class="empty" style="padding:12px 0"><div class="empty-icon">◉</div>Sin pulsos todavía.</div></div>
+      </div>
+    </div>
+
+  </div><!-- /scroll -->
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nb on" id="nb-nexo" onclick="navTo('nexo',this)"><span class="ni">⬡</span><span class="nl">nexo</span></button>
+    <button class="nb" id="nb-foco" onclick="navTo('foco',this)"><span class="ni">◎</span><span class="nl">foco</span></button>
+    <button class="nb" id="nb-vault" onclick="navTo('vault',this)"><span class="ni">◈</span><span class="nl">vault</span></button>
+    <button class="nb" id="nb-vida" onclick="navTo('vida',this)"><span class="ni">◇</span><span class="nl">vida</span></button>
+    <button class="nb" id="nb-mirror" onclick="navTo('mirror',this)"><span class="ni">◉</span><span class="nl">mirror</span></button>
+  </nav>
+</div>
+
+<!-- MODAL: CAPTURA IDEA -->
+<div class="modal" id="modal-idea" onclick="if(event.target===this)closeModal('idea')">
+  <div class="msheet">
+    <div class="mttl">> captura.idea</div>
+    <div class="msub">¿qué tienes en la cabeza?</div>
+    <textarea id="idea-txt" placeholder="// escríbelo o díctalo..." rows="3" style="margin-bottom:10px"></textarea>
+    <div style="font-size:10px;color:var(--gr);margin-bottom:8px">// proyecto</div>
+    <div class="chips" id="idea-proj-chips">
+      <button class="chip sel" onclick="selGroup(this)">luckyvet</button>
+      <button class="chip" onclick="selGroup(this)">poi</button>
+      <button class="chip" onclick="selGroup(this)">autopilot</button>
+      <button class="chip" onclick="selGroup(this)">personal</button>
+    </div>
+    <button class="btn" onclick="saveIdea()">guardar idea ›</button>
+    <button class="btn-ghost" onclick="closeModal('idea')">cancelar</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════
+// STORAGE HELPERS
+// ═══════════════════════════════
+const S = {
+  get: k => { try { return JSON.parse(localStorage.getItem('nexo_' + k)) } catch(e) { return null } },
+  set: (k, v) => localStorage.setItem('nexo_' + k, JSON.stringify(v)),
+  push: (k, v) => { const arr = S.get(k) || []; arr.unshift(v); S.set(k, arr) }
+};
+
+// ═══════════════════════════════
+// BOOT
+// ═══════════════════════════════
+const bootDelays = [0, 400, 800, 1300, 1800, 2200];
+bootDelays.forEach((d, i) => setTimeout(() => {
+  const el = document.getElementById('b' + i);
+  if (el) el.style.opacity = 1;
+}, d));
+setTimeout(() => {
+  const b = document.getElementById('boot');
+  b.style.opacity = 0;
+  setTimeout(() => {
+    b.style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    initApp();
+  }, 600);
+}, 3200);
+
+// ═══════════════════════════════
+// CLOCK & DAY
+// ═══════════════════════════════
+const DAYS = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('dayname').textContent = DAYS[n.getDay()];
+  document.getElementById('nexo-time').textContent = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+tick();
+setInterval(tick, 15000);
+
+// ═══════════════════════════════
+// ICC CALCULATION
+// ═══════════════════════════════
+function calcICC() {
+  const h = new Date().getHours();
+  let base = 50;
+  if (h >= 17 && h <= 23) base = 72 + Math.floor(Math.random() * 15);
+  else if (h >= 10 && h <= 16) base = 55 + Math.floor(Math.random() * 12);
+  else base = 35 + Math.floor(Math.random() * 15);
+  const pulsos = S.get('pulsos') || [];
+  if (pulsos.length > 0) {
+    const last = pulsos[0];
+    if (last.icc === 'alto') base = Math.min(base + 8, 95);
+    if (last.icc === 'bajo') base = Math.max(base - 10, 20);
+  }
+  return Math.min(Math.max(base, 10), 95);
+}
+
+function renderICC(val) {
+  const fill = document.getElementById('iccFill');
+  const num = document.getElementById('iccNum');
+  const tag = document.getElementById('iccTag');
+  const nsIcc = document.getElementById('ns-icc');
+  fill.style.width = val + '%';
+  num.textContent = val;
+  nsIcc.textContent = val;
+  if (val >= 70) {
+    fill.style.background = 'linear-gradient(90deg, var(--gd), var(--g))';
+    fill.style.boxShadow = '0 0 5px rgba(77,255,170,.4)';
+    num.style.color = 'var(--g)';
+    tag.textContent = '› bueno';
+    tag.style.color = 'var(--g)';
+  } else if (val >= 45) {
+    fill.style.background = 'linear-gradient(90deg, var(--ad), var(--a))';
+    fill.style.boxShadow = '0 0 5px rgba(255,204,85,.3)';
+    num.style.color = 'var(--a)';
+    tag.textContent = '› medio';
+    tag.style.color = 'var(--a)';
+  } else {
+    fill.style.background = 'linear-gradient(90deg, #cc3355, var(--r))';
+    fill.style.boxShadow = '0 0 5px rgba(255,102,128,.3)';
+    num.style.color = 'var(--r)';
+    tag.textContent = '› bajo · descanso';
+    tag.style.color = 'var(--r)';
+  }
+}
+
+// ═══════════════════════════════
+// NEXO SUGGEST
+// ═══════════════════════════════
+function renderNexoSuggest(icc) {
+  const h = new Date().getHours();
+  const ideas = (S.get('ideas') || []).length;
+  let txt, sub, dur, modo;
+  if (icc >= 70 && h >= 17) {
+    txt = 'Ventana cognitiva activa. Buen momento para trabajo técnico.';
+    sub = `icc ${icc} · tarde-noche · tu mejor franja`;
+    dur = '25-45 min';
+    modo = 'tarde › ventana cognitiva activa';
+  } else if (icc >= 70 && h >= 10) {
+    txt = 'Capacidad disponible. Avanza en el proyecto más activo.';
+    sub = `icc ${icc} · mañana productiva`;
+    dur = '25 min';
+    modo = 'mañana productiva · buena capacidad';
+  } else if (icc < 45) {
+    txt = 'ICC bajo. Una tarea ligera o descanso activo.';
+    sub = `icc ${icc} · modo restauración recomendado`;
+    dur = '10 min';
+    modo = 'modo restauración · icc bajo';
+  } else {
+    txt = 'Capacidad media. Revisión o tareas de mantenimiento.';
+    sub = `icc ${icc} · ritmo normal`;
+    dur = '25 min';
+    modo = 'ritmo normal · capacidad media';
+  }
+  if (ideas === 0) txt = 'Captura tu primera idea del día. El vault está vacío.';
+  document.getElementById('ns-txt').textContent = txt;
+  document.getElementById('ns-sub').textContent = sub;
+  document.getElementById('ns-dur').textContent = dur;
+  document.getElementById('nexo-modo').textContent = modo;
+}
+
+// ═══════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════
+let currentPage = 'nexo';
+function navTo(id, btn) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  const pg = document.getElementById('pg-' + id);
+  if (pg) pg.classList.add('on');
+  document.querySelectorAll('.nb').forEach(b => b.classList.remove('on'));
+  const nb = btn || document.getElementById('nb-' + id);
+  if (nb) nb.classList.add('on');
+  document.getElementById('scroll').scrollTop = 0;
+  currentPage = id;
+  if (id === 'vault') renderVault();
+  if (id === 'mirror') renderMirror();
+  if (id === 'foco') renderFocoHist();
+  if (id === 'pulso') renderPulsoHist();
+  if (id === 'vida') renderVida();
+}
+
+// ═══════════════════════════════
+// MODAL
+// ═══════════════════════════════
+function openModal(id) { document.getElementById('modal-' + id).classList.add('on') }
+function closeModal(id) { document.getElementById('modal-' + id).classList.remove('on') }
+
+// ═══════════════════════════════
+// CHIP SELECTION
+// ═══════════════════════════════
+function selGroup(el) {
+  const g = el.closest('.chips');
+  if (!g) return;
+  g.querySelectorAll('.chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function getSelChip(groupId) {
+  const g = document.getElementById(groupId);
+  if (!g) return '';
+  const sel = g.querySelector('.chip.sel');
+  return sel ? sel.textContent.trim() : '';
+}
+
+// ═══════════════════════════════
+// TOAST
+// ═══════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('on'), 2200);
+}
+
+// ═══════════════════════════════
+// IDEAS
+// ═══════════════════════════════
+function saveIdea() {
+  const txt = document.getElementById('idea-txt').value.trim();
+  if (!txt) { showToast('// escribe algo primero'); return; }
+  const proj = getSelChip('idea-proj-chips') || 'personal';
+  const idea = { id: Date.now(), txt, proj, ts: new Date().toISOString(), icc: calcICC() };
+  S.push('ideas', idea);
+  document.getElementById('idea-txt').value = '';
+  closeModal('idea');
+  updateNexoStats();
+  showToast('// idea guardada en ' + proj);
+  if (currentPage === 'vault') renderVault();
+}
+
+function renderVault() {
+  const ideas = S.get('ideas') || [];
+  const el = document.getElementById('vault-list');
+  document.getElementById('vault-count').textContent = '[' + ideas.length + ' total]';
+  document.getElementById('ag-vault').textContent = ideas.length + ' ideas';
+  if (!ideas.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">◈</div>Sin ideas todavía.<br>Usa el agente Idea para capturar.</div>'; return; }
+  el.innerHTML = ideas.map((idea, i) => `
+    <div class="ii" onclick="deleteIdea(${idea.id},this)">
+      <span class="ib" style="color:${i < 3 ? 'var(--g)' : 'var(--grd)'}">${i < 3 ? '●' : '○'}</span>
+      <div style="flex:1">
+        <div class="it">${escHtml(idea.txt)}</div>
+        <div class="im"><span class="itag">${idea.proj}</span> · ${relTime(idea.ts)} · icc ${idea.icc}</div>
+      </div>
+    </div>`).join('');
+}
+
+function deleteIdea(id, el) {
+  if (!confirm('¿Eliminar esta idea?')) return;
+  const ideas = (S.get('ideas') || []).filter(i => i.id !== id);
+  S.set('ideas', ideas);
+  renderVault();
+  updateNexoStats();
+}
+
+// ═══════════════════════════════
+// FOCO / MISSIONS
+// ═══════════════════════════════
+let focoInterval = null;
+let focoStart = null;
+
+function startMission() {
+  const task = document.getElementById('foco-task').value.trim();
+  if (!task) { showToast('// describe la misión'); return; }
+  const proj = getSelChip('foco-proj-chips') || 'personal';
+  const dur = getSelChip('foco-time-chips') || '25 min';
+  const mission = { id: Date.now(), task, proj, dur, startTs: new Date().toISOString(), status: 'active' };
+  S.set('foco_active', mission);
+  focoStart = Date.now();
+  document.getElementById('foco-active-sec').style.display = 'block';
+  document.getElementById('foco-new-sec').style.display = 'none';
+  document.getElementById('fa-proj').textContent = '› ' + proj;
+  document.getElementById('fa-txt').textContent = task;
+  document.getElementById('fa-sub').textContent = dur + ' · iniciado ahora';
+  document.getElementById('foco-task').value = '';
+  startFocoTimer();
+  updateNexoStats();
+  showToast('// misión iniciada');
+}
+
+function startFocoTimer() {
+  if (focoInterval) clearInterval(focoInterval);
+  focoStart = focoStart || Date.now();
+  focoInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - focoStart) / 1000);
+    const m = Math.floor(elapsed / 60), s = elapsed % 60;
+    const el = document.getElementById('fa-timer');
+    if (el) el.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+}
+
+function closeMission() {
+  const active = S.get('foco_active');
+  if (!active) return;
+  const result = getSelChip('foco-result-chips') || 'completada';
+  const note = document.getElementById('foco-note').value.trim();
+  const elapsed = Math.floor((Date.now() - focoStart) / 1000);
+  const mission = { ...active, result, note, elapsed, endTs: new Date().toISOString() };
+  S.push('foco_hist', mission);
+  S.set('foco_active', null);
+  clearInterval(focoInterval);
+  focoInterval = null;
+  focoStart = null;
+  document.getElementById('foco-active-sec').style.display = 'none';
+  document.getElementById('foco-new-sec').style.display = 'block';
+  document.getElementById('foco-note').value = '';
+  renderFocoHist();
+  updateNexoStats();
+  showToast('// misión ' + result);
+}
+
+function renderFocoHist() {
+  const hist = S.get('foco_hist') || [];
+  const el = document.getElementById('foco-hist-list');
+  document.getElementById('foco-hist-count').textContent = '[' + hist.length + ']';
+  const todayMissions = hist.filter(m => isToday(m.endTs));
+  document.getElementById('ns-misiones').textContent = todayMissions.length + ' hoy';
+  if (!hist.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">◎</div>Sin misiones todavía.</div>'; return; }
+  el.innerHTML = hist.slice(0, 10).map(m => {
+    const col = m.result === 'completada' ? 'var(--g)' : m.result === 'parcial' ? 'var(--a)' : 'var(--r)';
+    const mins = Math.floor((m.elapsed || 0) / 60);
+    return `<div class="phi">
+      <div class="phd"><span style="color:${col}">[${m.result}]</span> · <span style="color:var(--gd)">${m.proj}</span> · ${relTime(m.endTs)} · ${mins}min</div>
+      <div class="pht">${escHtml(m.task)}</div>
+      ${m.note ? '<div class="pht" style="color:var(--gr);font-size:10px;margin-top:2px">// ' + escHtml(m.note) + '</div>' : ''}
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════
+// PULSO
+// ═══════════════════════════════
+function savePulso() {
+  const p1 = document.getElementById('p1').value.trim();
+  const p2 = document.getElementById('p2').value.trim();
+  const p3 = document.getElementById('p3').value.trim();
+  if (!p1 && !p2 && !p3) { showToast('// escribe algo'); return; }
+  const icc = getSelChip('pulso-icc-chips') || 'medio';
+  const pulso = { id: Date.now(), p1, p2, p3, icc, ts: new Date().toISOString() };
+  S.push('pulsos', pulso);
+  document.getElementById('p1').value = '';
+  document.getElementById('p2').value = '';
+  document.getElementById('p3').value = '';
+  renderPulsoHist();
+  updateNexoStats();
+  navTo('nexo', document.getElementById('nb-nexo'));
+  showToast('// pulso registrado · buenas noches');
+}
+
+function renderPulsoHist() {
+  const pulsos = S.get('pulsos') || [];
+  const el = document.getElementById('pulso-hist-list');
+  document.getElementById('pulso-hist-count').textContent = '[' + pulsos.length + ']';
+  if (!pulsos.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">◉</div>Sin pulsos todavía.</div>'; return; }
+  el.innerHTML = pulsos.slice(0, 5).map(p => `
+    <div class="phi">
+      <div class="phd">${fmtDate(p.ts)} · icc <span style="color:${p.icc==='alto'?'var(--g)':p.icc==='bajo'?'var(--r)':'var(--a)'}">${p.icc}</span></div>
+      ${p.p1 ? '<div class="pht"><span style="color:var(--grd)">// hoy: </span>' + escHtml(p.p1) + '</div>' : ''}
+      ${p.p3 ? '<div class="pht" style="margin-top:3px"><span style="color:var(--grd)">// mañana: </span>' + escHtml(p.p3) + '</div>' : ''}
+    </div>`).join('');
+}
+
+// ═══════════════════════════════
+// VIDA — HIDRATACIÓN & GYM
+// ═══════════════════════════════
+function renderVida() {
+  const h = S.get('hidro_today') || 0;
+  const todayKey = new Date().toDateString();
+  const savedKey = S.get('hidro_day');
+  const hidro = savedKey === todayKey ? h : 0;
+  if (savedKey !== todayKey) { S.set('hidro_today', 0); S.set('hidro_day', todayKey); }
+  document.getElementById('hidro-num').textContent = hidro;
+  renderHidroBar(hidro);
+  renderGymWeek();
+  const gymToday = (S.get('gym_days') || []).includes(new Date().toDateString());
+  const btn = document.getElementById('gym-btn');
+  btn.textContent = gymToday ? 'sí ✓' : 'no';
+  btn.style.background = gymToday ? 'var(--gg)' : 'var(--bg3)';
+  btn.style.border = gymToday ? '1px solid var(--gd)' : '1px solid var(--bd)';
+  btn.style.color = gymToday ? 'var(--g)' : 'var(--gr)';
+  const gymDays = S.get('gym_days') || [];
+  document.getElementById('gym-racha').textContent = gymDays.length + ' días';
+}
+
+function changeHidro(delta) {
+  const todayKey = new Date().toDateString();
+  let h = S.get('hidro_today') || 0;
+  h = Math.max(0, Math.min(12, h + delta));
+  S.set('hidro_today', h);
+  S.set('hidro_day', todayKey);
+  document.getElementById('hidro-num').textContent = h;
+  renderHidroBar(h);
+  if (delta > 0) showToast('// +1 vaso · total: ' + h);
+}
+
+function renderHidroBar(h) {
+  const bar = document.getElementById('hidro-bar');
+  bar.innerHTML = '';
+  for (let i = 0; i < 8; i++) {
+    const d = document.createElement('div');
+    d.className = 'hd';
+    if (i < h) { d.style.background = 'var(--g)'; d.style.boxShadow = '0 0 3px rgba(77,255,170,.4)'; }
+    else { d.style.background = 'var(--bg3)'; d.style.border = '1px solid var(--bd)'; }
+    bar.appendChild(d);
+  }
+}
+
+function toggleGym() {
+  const todayKey = new Date().toDateString();
+  let days = S.get('gym_days') || [];
+  if (days.includes(todayKey)) { days = days.filter(d => d !== todayKey); showToast('// gym removido'); }
+  else { days.unshift(todayKey); showToast('// gym registrado 💪'); }
+  S.set('gym_days', days);
+  renderVida();
+}
+
+function renderGymWeek() {
+  const days = S.get('gym_days') || [];
+  const el = document.getElementById('gym-week');
+  el.innerHTML = '';
+  const dow = ['L','M','X','J','V','S','D'];
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toDateString();
+    const done = days.includes(key);
+    const isToday = i === 0;
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px';
+    const dot = document.createElement('div');
+    dot.className = 'hd';
+    dot.style.width = '14px';
+    dot.style.height = '14px';
+    if (done) { dot.style.background = 'var(--g)'; dot.style.boxShadow = '0 0 4px rgba(77,255,170,.4)'; }
+    else if (isToday) { dot.style.background = 'transparent'; dot.style.border = '1px solid var(--g)'; }
+    else { dot.style.background = 'var(--bg3)'; dot.style.border = '1px solid var(--bd)'; }
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-size:10px;color:' + (isToday ? 'var(--g)' : 'var(--gr)');
+    lbl.textContent = dow[d.getDay() === 0 ? 6 : d.getDay() - 1];
+    wrap.appendChild(dot);
+    wrap.appendChild(lbl);
+    el.appendChild(wrap);
+  }
+}
+
+// ═══════════════════════════════
+// MIRROR
+// ═══════════════════════════════
+function renderMirror() {
+  const ideas = S.get('ideas') || [];
+  const pulsos = S.get('pulsos') || [];
+  const gymDays = S.get('gym_days') || [];
+  const missions = S.get('foco_hist') || [];
+  const weekStart = new Date(); weekStart.setDate(weekStart.getDate() - 7);
+  const weekIdeas = ideas.filter(i => new Date(i.ts) > weekStart);
+  const weekPulsos = pulsos.filter(p => new Date(p.ts) > weekStart);
+  const weekGym = gymDays.filter(d => new Date(d) > weekStart);
+  const semNum = getWeekNum();
+  document.getElementById('mirror-sem').textContent = 'sem ' + semNum + ' · 2026';
+  document.getElementById('mr-ideas').textContent = weekIdeas.length;
+  document.getElementById('mr-pulsos').textContent = weekPulsos.length + ' / 7';
+  document.getElementById('mr-gym').textContent = weekGym.length;
+  const hidro = S.get('hidro_today') || 0;
+  document.getElementById('mr-agua').textContent = hidro > 0 ? hidro + ' hoy' : '--';
+  // diario inverso
+  const diario = document.getElementById('mirror-diario');
+  if (weekIdeas.length === 0 && weekPulsos.length === 0) {
+    diario.innerHTML = '<div class="empty" style="padding:16px 0"><div class="empty-icon">◉</div>Acumula datos durante la semana.<br>El mirror se escribe solo.</div>';
+  } else {
+    const lines = [];
+    if (weekIdeas.length > 0) {
+      const projs = {};
+      weekIdeas.forEach(i => projs[i.proj] = (projs[i.proj] || 0) + 1);
+      const top = Object.entries(projs).sort((a,b) => b[1]-a[1])[0];
+      lines.push('Esta semana se capturaron ' + weekIdeas.length + ' ideas. El proyecto más activo: ' + top[0] + ' (' + top[1] + ').');
+    }
+    if (weekPulsos.length > 0) lines.push('Se registraron ' + weekPulsos.length + ' pulsos de ' + 7 + ' posibles.');
+    if (weekGym.length > 0) lines.push('Sesiones de gym completadas: ' + weekGym.length + '.');
+    const completed = missions.filter(m => new Date(m.endTs) > weekStart && m.result === 'completada').length;
+    const total = missions.filter(m => new Date(m.endTs) > weekStart).length;
+    if (total > 0) lines.push('Misiones: ' + completed + ' de ' + total + ' completadas.');
+    diario.innerHTML = lines.map(l => '<div class="dline" style="font-size:11px;color:var(--gr);line-height:1.8;margin-bottom:3px"><span style="color:var(--grd)">// </span>' + l + '</div>').join('');
+  }
+  // streak
+  buildStreakGrid();
+  // ultimo pulso
+  const lastPulso = document.getElementById('mirror-last-pulso');
+  if (!pulsos.length) { lastPulso.innerHTML = '<div class="empty" style="padding:12px 0"><div class="empty-icon">◉</div>Sin pulsos todavía.</div>'; }
+  else {
+    const p = pulsos[0];
+    lastPulso.innerHTML = '<div class="phi"><div class="phd">' + fmtDate(p.ts) + ' · icc <span style="color:' + (p.icc==='alto'?'var(--g)':p.icc==='bajo'?'var(--r)':'var(--a)') + '">' + p.icc + '</span></div>' +
+      (p.p1 ? '<div class="pht"><span style="color:var(--grd)">// hoy: </span>' + escHtml(p.p1) + '</div>' : '') +
+      (p.p2 ? '<div class="pht" style="margin-top:3px"><span style="color:var(--grd)">// abierto: </span>' + escHtml(p.p2) + '</div>' : '') +
+      (p.p3 ? '<div class="pht" style="margin-top:3px"><span style="color:var(--grd)">// mañana: </span>' + escHtml(p.p3) + '</div>' : '') + '</div>';
+  }
+}
+
+function buildStreakGrid() {
+  const gymDays = S.get('gym_days') || [];
+  const el = document.getElementById('mirror-streak');
+  const meta = document.getElementById('mirror-streak-meta');
+  el.innerHTML = '';
+  const today = new Date();
+  let total = 0, best = 0, cur = 0;
+  for (let i = 27; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toDateString();
+    const done = gymDays.includes(key);
+    if (done) { total++; cur++; best = Math.max(best, cur); } else cur = 0;
+    const dot = document.createElement('div');
+    dot.className = 'sd';
+    if (done) { dot.style.background = 'var(--g)'; dot.style.boxShadow = '0 0 3px rgba(77,255,170,.35)'; }
+    else if (i === 0) { dot.style.background = 'transparent'; dot.style.border = '1px solid var(--g)'; }
+    else { dot.style.background = 'var(--bg3)'; dot.style.border = '1px solid var(--bd)'; }
+    el.appendChild(dot);
+  }
+  meta.textContent = '// ' + total + ' sesiones · mejor racha: ' + best + ' días';
+}
+
+// ═══════════════════════════════
+// NEXO STATS UPDATE
+// ═══════════════════════════════
+function updateNexoStats() {
+  const ideas = S.get('ideas') || [];
+  const pulsos = S.get('pulsos') || [];
+  const missions = S.get('foco_hist') || [];
+  const todayIdeas = ideas.filter(i => isToday(i.ts));
+  const weekPulsos = pulsos.filter(p => {
+    const d = new Date(p.ts);
+    const now = new Date();
+    return now - d < 7 * 24 * 60 * 60 * 1000;
+  });
+  const todayMissions = missions.filter(m => isToday(m.endTs));
+  document.getElementById('ns-ideas').textContent = todayIdeas.length;
+  document.getElementById('ns-pulsos').textContent = weekPulsos.length;
+  document.getElementById('ns-misiones').textContent = todayMissions.length + ' hoy';
+  document.getElementById('ag-vault').textContent = ideas.length + ' ideas';
+  document.getElementById('ag-vault').style.color = ideas.length > 0 ? 'var(--gd)' : 'var(--gr)';
+  const active = S.get('foco_active');
+  document.getElementById('ag-foco').textContent = active ? '1 activa' : 'misiones';
+  document.getElementById('ag-foco').style.color = active ? 'var(--a)' : 'var(--gr)';
+}
+
+// ═══════════════════════════════
+// RESTORE ACTIVE MISSION
+// ═══════════════════════════════
+function restoreActiveMission() {
+  const active = S.get('foco_active');
+  if (!active) return;
+  focoStart = new Date(active.startTs).getTime();
+  document.getElementById('foco-active-sec').style.display = 'block';
+  document.getElementById('foco-new-sec').style.display = 'none';
+  document.getElementById('fa-proj').textContent = '› ' + active.proj;
+  document.getElementById('fa-txt').textContent = active.task;
+  document.getElementById('fa-sub').textContent = active.dur + ' · en progreso';
+  startFocoTimer();
+}
+
+// ═══════════════════════════════
+// HELPERS
+// ═══════════════════════════════
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function isToday(ts) { return ts && new Date(ts).toDateString() === new Date().toDateString() }
+function relTime(ts) {
+  const d = (Date.now() - new Date(ts)) / 1000;
+  if (d < 60) return 'ahora';
+  if (d < 3600) return Math.floor(d/60) + 'min';
+  if (d < 86400) return Math.floor(d/3600) + 'h';
+  if (d < 172800) return 'ayer';
+  return Math.floor(d/86400) + 'd';
+}
+function fmtDate(ts) {
+  const d = new Date(ts);
+  return DAYS[d.getDay()] + ' ' + String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function getWeekNum() {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 3 - (d.getDay()+6)%7);
+  const week1 = new Date(d.getFullYear(),0,4);
+  return 1 + Math.round(((d.getTime()-week1.getTime())/86400000 - 3 + (week1.getDay()+6)%7)/7);
+}
+
+// ═══════════════════════════════
+// INIT
+// ═══════════════════════════════
+function initApp() {
+  tick();
+  const icc = calcICC();
+  setTimeout(() => renderICC(icc), 300);
+  renderNexoSuggest(icc);
+  updateNexoStats();
+  restoreActiveMission();
+  renderFocoHist();
+}
+</script>
+</body>
+</html>
