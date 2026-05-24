@@ -437,6 +437,57 @@ const NEXO_DB = window.supabase
   ? window.supabase.createClient(NEXO_SUPABASE_URL, NEXO_SUPABASE_ANON_KEY)
   : null;  
 // ═══════════════════════════════
+// SUPABASE EVENT HELPERS
+// ═══════════════════════════════
+function canonProject(p) {
+  const map = {
+    luckyvet: 'luckyvet',
+    poi: 'poi_banijay',
+    poi_banijay: 'poi_banijay',
+    autopilot: 'autopilot_broker',
+    autopilot_broker: 'autopilot_broker',
+    personal: 'personal',
+    vida: 'vida',
+    nexo: 'nexo'
+  };
+  return map[p] || 'personal';
+}
+
+function shortTitle(text) {
+  return String(text || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+}
+
+async function insertNexoEvent(payload) {
+  if (!NEXO_DB) {
+    console.warn('[NEXO] Supabase no disponible');
+    return { ok: false, error: 'Supabase no disponible' };
+  }
+
+  try {
+    const row = {
+      source: payload.source || 'pwa',
+      type: payload.type || 'event',
+      project: payload.project || 'personal',
+      title: payload.title || null,
+      content: payload.content || null,
+      raw_text: payload.raw_text || null,
+      metadata: payload.metadata || {}
+    };
+
+    const { error } = await NEXO_DB
+      .from('nexo_events')
+      .insert(row);
+
+    if (error) throw error;
+
+    return { ok: true };
+  } catch (err) {
+    console.error('[NEXO] Error insertando evento Supabase:', err);
+    return { ok: false, error: err.message || String(err) };
+  }
+}
+  
+// ═══════════════════════════════
 // STORAGE HELPERS
 // ═══════════════════════════════
 const S = {
@@ -687,15 +738,56 @@ function renderAnimaEvents(events) {
 function saveIdea() {
   const txt = document.getElementById('idea-txt').value.trim();
   if (!txt) { showToast('// escribe algo primero'); return; }
+
   const proj = getSelChip('idea-proj-chips') || 'personal';
-  const idea = { id: Date.now(), txt, proj, ts: new Date().toISOString(), icc: calcICC() };
+  const idea = {
+    id: Date.now(),
+    txt,
+    proj,
+    ts: new Date().toISOString(),
+    icc: calcICC()
+  };
+
   S.push('ideas', idea);
+
+  syncIdeaToSupabase(idea);
+
   document.getElementById('idea-txt').value = '';
   closeModal('idea');
   updateNexoStats();
   showToast('// idea guardada en ' + proj);
+
   if (currentPage === 'vault') renderVault();
 }
+
+async function syncIdeaToSupabase(idea) {
+  if (!idea) return;
+
+  const project = canonProject(idea.proj);
+  const raw = `---
+${project} · captura_idea
+${idea.txt}`;
+
+  const result = await insertNexoEvent({
+    source: 'pwa',
+    type: 'idea',
+    project,
+    title: shortTitle(idea.txt),
+    content: idea.txt,
+    raw_text: raw,
+    metadata: {
+      module: 'vault',
+      local_id: idea.id,
+      original_project: idea.proj,
+      icc: idea.icc,
+      created_from: 'nexo_pwa'
+    }
+  });
+
+  if (!result.ok) {
+    showToast('// idea local · sync error');
+  }
+}  
 
 function renderVault() {
   const ideas = S.get('ideas') || [];
