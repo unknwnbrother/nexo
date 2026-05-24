@@ -228,7 +228,16 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--grd)}
         <div class="sh"><span class="st">$ vault.ideas</span><span class="sm" id="vault-count">[0 total]</span></div>
         <div class="cmt">tus capturas · ordenadas por recencia</div>
         <div id="vault-list"><div class="empty"><div class="empty-icon">◈</div>Sin ideas todavía.<br>Usa el agente Idea para capturar.</div></div>
-      </div>
+        </div>
+<div class="sec">
+  <div class="sh"><span class="st">$ anima.memoria</span><span class="sm" id="anima-count">[sync]</span></div>
+  <div class="cmt">capturas desde el atajo ANIMA</div>
+  <div id="anima-list">
+    <div class="empty">
+      <div class="empty-icon">◇</div>
+      Sin capturas ANIMA todavía.
+    </div>
+  </div>      </div>
     </div>
 
     <!-- ══ PAGE: FOCO ══ -->
@@ -419,6 +428,15 @@ textarea::placeholder,input[type=text]::placeholder{color:var(--grd)}
   
 <script>
 // ═══════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════
+const NEXO_SUPABASE_URL = 'https://oygppmmsvxmjcqprgnfb.supabase.co';
+const NEXO_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95Z3BwbW1zdnhtaWNxcHJnbmZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NzM3NjUsImV4cCI6MjA5NTE0OTc2NX0.16tHsUZauLUxHEQZ1vRFYJ8XfpR5LnHsXyVVMn6UiME;
+
+const NEXO_DB = window.supabase
+  ? window.supabase.createClient(NEXO_SUPABASE_URL, NEXO_SUPABASE_ANON_KEY)
+  : null;  
+// ═══════════════════════════════
 // STORAGE HELPERS
 // ═══════════════════════════════
 const S = {
@@ -553,7 +571,10 @@ function navTo(id, btn) {
   if (nb) nb.classList.add('on');
   document.getElementById('scroll').scrollTop = 0;
   currentPage = id;
-  if (id === 'vault') renderVault();
+  if (id === 'vault') {
+  renderVault();
+  fetchAnimaEvents();
+}
   if (id === 'mirror') renderMirror();
   if (id === 'foco') renderFocoHist();
   if (id === 'pulso') renderPulsoHist();
@@ -595,6 +616,71 @@ function showToast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('on'), 2200);
 }
 
+// ═══════════════════════════════
+// ANIMA / SUPABASE EVENTS
+// ═══════════════════════════════
+async function fetchAnimaEvents() {
+  const list = document.getElementById('anima-list');
+  const count = document.getElementById('anima-count');
+
+  if (!list || !count) return;
+
+  if (!NEXO_DB) {
+    count.textContent = '[offline]';
+    list.innerHTML = '<div class="empty"><div class="empty-icon">◇</div>Supabase no está disponible.</div>';
+    return;
+  }
+
+  count.textContent = '[sync...]';
+
+  const { data, error } = await NEXO_DB
+    .from('nexo_events')
+    .select('id,created_at,source,type,project,title,content,raw_text')
+    .eq('source', 'anima_shortcut')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    count.textContent = '[error]';
+    list.innerHTML = '<div class="empty"><div class="empty-icon">◇</div>Error leyendo ANIMA.<br>' + escHtml(error.message) + '</div>';
+    return;
+  }
+
+  renderAnimaEvents(data || []);
+}
+
+function renderAnimaEvents(events) {
+  const list = document.getElementById('anima-list');
+  const count = document.getElementById('anima-count');
+
+  if (!list || !count) return;
+
+  count.textContent = '[' + events.length + ']';
+
+  if (!events.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-icon">◇</div>Sin capturas ANIMA todavía.</div>';
+    return;
+  }
+
+  list.innerHTML = events.map(ev => {
+    const project = ev.project || 'personal';
+    const type = ev.type || 'captura';
+    const text = ev.raw_text || ev.content || ev.title || '';
+    return `
+      <div class="phi">
+        <div class="phd">
+          <span style="color:var(--gd)">${escHtml(project)}</span>
+          ·
+          <span style="color:var(--a)">${escHtml(type)}</span>
+          ·
+          ${relTime(ev.created_at)}
+        </div>
+        <div class="pht">${escHtml(text)}</div>
+      </div>
+    `;
+  }).join('');
+}
+  
 // ═══════════════════════════════
 // IDEAS
 // ═══════════════════════════════
@@ -976,6 +1062,7 @@ function initApp() {
   updateNexoStats();
   restoreActiveMission();
   renderFocoHist();
+  fetchAnimaEvents();
 }
 </script>
 </body>
